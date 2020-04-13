@@ -12,24 +12,26 @@
         :key="'column-' + col"
       >
         <rect
-          :width="cube"
-          :height="cube"
+          :width="square"
+          :height="square"
           :x="x(col)"
           :y="y(row)"
           class="square"
         />
         <rect
-          :width="side"
-          :height="cube"
-          :x="x(col)+cube"
+          v-if="col !== columns"
+          :width="edge"
+          :height="square"
+          :x="x(col)+square"
           :y="y(row)"
           class="edge"
         />
         <rect
-          :width="cube+side"
-          :height="side"
+          v-if="row !== rows"
+          :width="square+edge"
+          :height="edge"
           :x="x(col)"
-          :y="y(row)+cube"
+          :y="y(row)+square"
           class="edge"
         />
       </g>
@@ -42,15 +44,25 @@ import state from '@/state';
 
 export default {
   name: 'Grid',
+  props: {
+    square: {
+      type: Number,
+      default: 14,
+    },
+    edge: {
+      type: Number,
+      default: 3,
+    },
+  },
   data () {
     return {
       state,
-      cube: 12,
-      side: 3,
       width: 0,
       height: 0,
       rows: 0,
       columns: 0,
+      offsetX: 0,
+      offsetY: 0,
     };
   },
   computed: { style () {
@@ -60,17 +72,20 @@ export default {
     this.width = window.innerWidth;
     this.height = window.innerHeight - 48;
 
-    this.columns = Math.floor(this.width / (this.cube + this.side));
-    this.rows = Math.floor(this.height / (this.cube + this.side));
+    this.columns = Math.floor(this.width / (this.square + this.edge));
+    this.rows = Math.floor(this.height / (this.square + this.edge));
+
+    this.offsetX = (this.width - ((this.columns * (this.square + this.edge)) - this.edge)) / 2;
+    this.offsetY = (this.height - ((this.rows * (this.square + this.edge)) - this.edge)) / 2;
 
     console.log(this.width, this.height, this.columns, this.rows);
   },
   methods: {
     x (col) {
-      return (col - 1) * (this.cube + this.side);
+      return ((col - 1) * (this.square + this.edge)) + this.offsetX;
     },
     y (row) {
-      return (row - 1) * (this.cube + this.side);
+      return ((row - 1) * (this.square + this.edge)) + this.offsetY;
     },
   },
 };
@@ -87,8 +102,16 @@ export default {
   fill: #fff;
 }
 
+.square:hover {
+  fill: #0073b1;
+}
+
 .edge {
   fill: #0073b1;
-  opacity: 0.5;
+  opacity: 0.25;
+}
+
+.edge:hover {
+  opacity: 1;
 }
 </style>
